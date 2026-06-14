@@ -6,6 +6,37 @@
 
 ---
 
+## 📱 Screenshots
+
+<div align="center">
+  <table>
+    <tr>
+      <td align="center">
+        <strong>🏠 Home Screen</strong>
+      </td>
+      <td align="center">
+        <strong>❓ Quiz Screen</strong>
+      </td>
+      <td align="center">
+        <strong>📊 Result Screen</strong>
+      </td>
+    </tr>
+    <tr>
+      <td align="center">
+        <img src="screenshots/home_screen.jpeg" alt="Home Screen" width="250"/>
+      </td>
+      <td align="center">
+        <img src="screenshots/quiz_screen.jpeg" alt="Quiz Screen" width="250"/>
+      </td>
+      <td align="center">
+        <img src="screenshots/result_screen.jpeg" alt="Result Screen" width="250"/>
+      </td>
+    </tr>
+  </table>
+</div>
+
+---
+
 ## 📱 Overview
 
 **Amar Proshno** is a simple yet polished multiple-choice quiz application built with Flutter. The project focuses on clean UI design, smooth user experience, and straightforward application architecture while keeping the implementation lightweight and easy to understand.
