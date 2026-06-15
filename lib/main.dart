@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:get/get.dart';
+import 'routes/app_routes.dart';
 import 'screens/home_screen.dart';
+import 'screens/quiz_screen.dart';
+import 'screens/result_screen.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -18,7 +22,7 @@ class AmarProshnoApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return GetMaterialApp(
       title: 'Amar Proshno',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
@@ -34,7 +38,12 @@ class AmarProshnoApp extends StatelessWidget {
         ),
         scaffoldBackgroundColor: const Color(0xFFD9BEDC),
       ),
-      home: const HomeScreen(),
+      initialRoute: AppRoutes.home,
+      getPages: [
+        GetPage(name: AppRoutes.home, page: () => const HomeScreen()),
+        GetPage(name: AppRoutes.quiz, page: () => const QuizScreen()),
+        GetPage(name: AppRoutes.result, page: () => const ResultScreen()),
+      ],
     );
   }
 }
