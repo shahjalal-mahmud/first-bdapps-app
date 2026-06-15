@@ -7,7 +7,7 @@ void main() {
   SystemChrome.setSystemUIOverlayStyle(
     const SystemUiOverlayStyle(
       statusBarColor: Colors.transparent,
-      statusBarIconBrightness: Brightness.dark,
+      statusBarIconBrightness: Brightness.light,
     ),
   );
   runApp(const AmarProshnoApp());
@@ -24,15 +24,15 @@ class AmarProshnoApp extends StatelessWidget {
       theme: ThemeData(
         useMaterial3: true,
         colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color(0xFFB39DDB),
+          seedColor: const Color(0xFFB086BC),
           brightness: Brightness.light,
         ).copyWith(
-          surface: const Color(0xFFEDE7F6),
-          primary: const Color(0xFF9575CD),
-          secondary: const Color(0xFFCE93D8),
-          onSurface: const Color(0xFF4A148C),
+          surface: const Color(0xFFD9BEDC),
+          primary: const Color(0xFF834FA0),
+          secondary: const Color(0xFFB086BC),
+          onSurface: const Color(0xFF612A7E),
         ),
-        scaffoldBackgroundColor: const Color(0xFFEDE7F6),
+        scaffoldBackgroundColor: const Color(0xFFD9BEDC),
       ),
       home: const HomeScreen(),
     );
