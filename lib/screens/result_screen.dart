@@ -1,27 +1,21 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import '../controllers/quiz_controller.dart';
 import '../data/quiz_data.dart';
-import 'quiz_screen.dart';
+import '../routes/app_routes.dart';
 import 'home_screen.dart';
 
 class ResultScreen extends StatelessWidget {
-  final List<int?> selectedAnswers;
-
-  const ResultScreen({super.key, required this.selectedAnswers});
-
-  int get _correctCount {
-    int count = 0;
-    for (int i = 0; i < quizQuestions.length; i++) {
-      if (selectedAnswers[i] == quizQuestions[i].correctAnswerIndex) count++;
-    }
-    return count;
-  }
+  const ResultScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final correct = _correctCount;
-    final wrong = quizQuestions.length - correct;
-    final total = quizQuestions.length;
-    final percentage = (correct / total * 100).toInt();
+    final ctrl = Get.find<QuizController>();
+    final correct = ctrl.correctCount;
+    final wrong = ctrl.wrongCount;
+    final total = ctrl.totalCount;
+    final percentage = ctrl.percentage;
+    final answers = ctrl.answers;
 
     return Scaffold(
       body: Container(
@@ -39,12 +33,10 @@ class ResultScreen extends StatelessWidget {
                 child: Row(
                   children: [
                     GestureDetector(
-                      onTap: () =>
-                          Navigator.of(context).pushAndRemoveUntil(
-                            MaterialPageRoute(
-                                builder: (_) => const HomeScreen()),
-                                (route) => false,
-                          ),
+                      onTap: () {
+                        ctrl.reset();
+                        Get.offAllNamed(AppRoutes.home);
+                      },
                       child: Container(
                         width: 36,
                         height: 36,
@@ -158,7 +150,6 @@ class ResultScreen extends StatelessWidget {
 
               const SizedBox(height: 18),
 
-              // Detailed results label
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 24),
                 child: Align(
@@ -177,14 +168,13 @@ class ResultScreen extends StatelessWidget {
 
               const SizedBox(height: 8),
 
-              // Scrollable results
               Expanded(
                 child: ListView.builder(
                   padding: const EdgeInsets.symmetric(horizontal: 24),
                   itemCount: quizQuestions.length,
                   itemBuilder: (context, index) {
                     final question = quizQuestions[index];
-                    final userAnswerIndex = selectedAnswers[index];
+                    final userAnswerIndex = answers[index];
                     final isCorrect =
                         userAnswerIndex == question.correctAnswerIndex;
                     final userAnswerText = userAnswerIndex != null
@@ -214,12 +204,10 @@ class ResultScreen extends StatelessWidget {
                         label: 'HOME',
                         icon: Icons.home_rounded,
                         filled: false,
-                        onTap: () =>
-                            Navigator.of(context).pushAndRemoveUntil(
-                              MaterialPageRoute(
-                                  builder: (_) => const HomeScreen()),
-                                  (route) => false,
-                            ),
+                        onTap: () {
+                          ctrl.reset();
+                          Get.offAllNamed(AppRoutes.home);
+                        },
                       ),
                     ),
                     const SizedBox(width: 12),
@@ -228,10 +216,10 @@ class ResultScreen extends StatelessWidget {
                         label: 'RESTART',
                         icon: Icons.refresh_rounded,
                         filled: true,
-                        onTap: () => Navigator.of(context).pushReplacement(
-                          MaterialPageRoute(
-                              builder: (_) => const QuizScreen()),
-                        ),
+                        onTap: () {
+                          ctrl.reset();
+                          Get.offNamed(AppRoutes.quiz);
+                        },
                       ),
                     ),
                   ],
@@ -268,7 +256,8 @@ class _StatPill extends StatelessWidget {
         color: Colors.white.withValues(alpha: isPositive ? 0.22 : 0.12),
         borderRadius: BorderRadius.circular(30),
         border: Border.all(
-            color: Colors.white.withValues(alpha: isPositive ? 0.5 : 0.25)),
+            color: Colors.white
+                .withValues(alpha: isPositive ? 0.5 : 0.25)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -379,12 +368,12 @@ class _ResultItem extends StatelessWidget {
                 _AnswerRow(
                     label: 'Your answer:',
                     value: userAnswer,
-                    isUserCorrect: isCorrect),
+                    dimmed: !isCorrect),
                 const SizedBox(height: 4),
                 _AnswerRow(
                     label: 'Correct:',
                     value: correctAnswer,
-                    isUserCorrect: true),
+                    dimmed: false),
               ],
             ),
           ),
@@ -397,12 +386,12 @@ class _ResultItem extends StatelessWidget {
 class _AnswerRow extends StatelessWidget {
   final String label;
   final String value;
-  final bool isUserCorrect;
+  final bool dimmed;
 
   const _AnswerRow({
     required this.label,
     required this.value,
-    required this.isUserCorrect,
+    required this.dimmed,
   });
 
   @override
@@ -421,7 +410,7 @@ class _AnswerRow extends StatelessWidget {
             style: TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.w600,
-              color: Colors.white.withValues(alpha: isUserCorrect ? 0.95 : 0.6),
+              color: Colors.white.withValues(alpha: dimmed ? 0.55 : 0.95),
             ),
           ),
         ),
@@ -465,9 +454,7 @@ class _ActionButton extends StatelessWidget {
           children: [
             Icon(icon,
                 size: 18,
-                color: filled
-                    ? const Color(0xFF612A7E)
-                    : Colors.white),
+                color: filled ? const Color(0xFF612A7E) : Colors.white),
             const SizedBox(width: 8),
             Text(
               label,
@@ -475,7 +462,8 @@ class _ActionButton extends StatelessWidget {
                 fontSize: 13,
                 fontWeight: FontWeight.w800,
                 letterSpacing: 1.5,
-                color: filled ? const Color(0xFF612A7E) : Colors.white,
+                color:
+                filled ? const Color(0xFF612A7E) : Colors.white,
               ),
             ),
           ],
