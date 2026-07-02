@@ -15,7 +15,7 @@ class AiService {
   static const String _endpoint =
       'https://llm.kimchi.dev/openai/v1/chat/completions';
 
-  static const String apiKey = "PASTE_API_KEY_HERE";
+  static const String apiKey = 'castai_v1_fa851100be709788078104f6ee2f475f24b38bf935a1fde13282abf23a4b4b46_8889a63f';
 
   static const String _model = 'kimi-k2.6';
 
