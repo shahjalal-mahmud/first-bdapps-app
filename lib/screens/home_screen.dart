@@ -179,6 +179,42 @@ class HomeScreen extends StatelessWidget {
                 ),
               ),
 
+              const SizedBox(height: 14),
+
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 48),
+                child: SizedBox(
+                  width: double.infinity,
+                  height: 54,
+                  child: OutlinedButton.icon(
+                    onPressed: () {
+                      Get.toNamed(AppRoutes.aiChat);
+                    },
+                    style: OutlinedButton.styleFrom(
+                      backgroundColor: Colors.white.withValues(alpha: 0.14),
+                      side: BorderSide(
+                        color: Colors.white.withValues(alpha: 0.6),
+                        width: 1.4,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(30),
+                      ),
+                    ),
+                    icon: const Icon(Icons.smart_toy_rounded,
+                        color: Colors.white, size: 20),
+                    label: const Text(
+                      'AI Assistant',
+                      style: TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: 2,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+
               const SizedBox(height: 16),
 
               Row(
