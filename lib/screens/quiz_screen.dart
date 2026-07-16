@@ -4,7 +4,7 @@ import '../controllers/quiz_controller.dart';
 import '../data/quiz_data.dart';
 import '../routes/app_routes.dart';
 import '../widgets/option_tile.dart';
-import 'home_screen.dart';
+import '../widgets/app_background.dart';
 
 class QuizScreen extends StatelessWidget {
   const QuizScreen({super.key});

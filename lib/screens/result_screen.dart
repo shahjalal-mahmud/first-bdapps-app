@@ -3,7 +3,7 @@ import 'package:get/get.dart';
 import '../controllers/quiz_controller.dart';
 import '../data/quiz_data.dart';
 import '../routes/app_routes.dart';
-import 'home_screen.dart';
+import '../widgets/app_background.dart';
 
 class ResultScreen extends StatelessWidget {
   const ResultScreen({super.key});

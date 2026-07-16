@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../models/chat_message.dart';
 import '../services/ai_service.dart';
-import 'home_screen.dart'; // for appGradient & cardDecoration
+import '../widgets/app_background.dart';
 
 class AIChatScreen extends StatefulWidget {
   const AIChatScreen({super.key});
