@@ -3,7 +3,6 @@ import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 
 import 'controllers/subscription_controller.dart';
-import 'repositories/subscription_repository.dart';
 import 'routes/app_routes.dart';
 import 'screens/ai_chat_screen.dart';
 import 'screens/home_screen.dart';
@@ -14,6 +13,7 @@ import 'screens/result_screen.dart';
 import 'screens/settings_screen.dart';
 import 'screens/splash_screen.dart';
 import 'screens/subscription_screen.dart';
+import 'services/bdapps_service.dart';
 import 'services/local_storage_service.dart';
 
 Future<void> main() async {
@@ -23,16 +23,13 @@ Future<void> main() async {
   final storage = await LocalStorageService.create();
   Get.put<LocalStorageService>(storage, permanent: true);
 
-  // Repository (singleton) wrapping the REST client.
-  Get.put<SubscriptionRepository>(
-    SubscriptionRepository(),
-    permanent: true,
-  );
+  // Single BDApps HTTP service.
+  Get.put<BdappsService>(BdappsService(), permanent: true);
 
   // Reactive subscription state controller.
   Get.put<SubscriptionController>(
     SubscriptionController(
-      repository: Get.find<SubscriptionRepository>(),
+      service: Get.find<BdappsService>(),
       storage: Get.find<LocalStorageService>(),
     ),
     permanent: true,

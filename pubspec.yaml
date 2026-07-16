@@ -19,9 +19,6 @@ dependencies:
   # HTTP client for BDApps subscription REST API
   http: ^1.2.0
 
-  # Connectivity status for offline handling
-  connectivity_plus: ^6.0.5
-
 dev_dependencies:
   flutter_test:
     sdk: flutter
