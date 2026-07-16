@@ -1,8 +1,10 @@
 # Amar Proshno
 
-### Flutter Quiz Application with Firebase Authentication & AI Assistant
+### Flutter Quiz Application with BDApps Subscription Gating and AI Assistant
 
-*A modern and beautifully designed Flutter quiz application with secure user authentication and an AI-powered chat assistant, built as an assignment project.*
+*A beautifully designed Flutter quiz application whose access is gated by a
+Robi/Airtel Bangladesh mobile subscription through the existing BDApps PHP
+backend, with an AI-powered chat assistant for short quiz hints.*
 
 ---
 
@@ -12,24 +14,24 @@
   <table>
     <tr>
       <td align="center">
-        <strong>🔐 Login Screen</strong>
+        <strong>🔐 Phone Registration</strong>
       </td>
       <td align="center">
-        <strong>📝 Sign Up Screen</strong>
+        <strong>📝 Subscription</strong>
       </td>
       <td align="center">
-        <strong>🏠 Home Screen</strong>
+        <strong>🏠 Home</strong>
       </td>
     </tr>
     <tr>
       <td align="center">
-        <img src="screenshots/login_screen.jpeg" alt="Login Screen" width="250"/>
+        <img src="screenshots/login_screen.jpeg" alt="Phone Registration" width="250"/>
       </td>
       <td align="center">
-        <img src="screenshots/signup_screen.jpeg" alt="Sign Up Screen" width="250"/>
+        <img src="screenshots/signup_screen.jpeg" alt="Subscription" width="250"/>
       </td>
       <td align="center">
-        <img src="screenshots/home_screen.jpeg" alt="Home Screen" width="250"/>
+        <img src="screenshots/home_screen.jpeg" alt="Home" width="250"/>
       </td>
     </tr>
   </table>
@@ -39,220 +41,293 @@
   <table>
     <tr>
       <td align="center">
-        <strong>❓ Quiz Screen</strong>
+        <strong>❓ Quiz</strong>
       </td>
       <td align="center">
-        <strong>📊 Result Screen</strong>
+        <strong>📊 Result</strong>
       </td>
       <td align="center">
-        <strong>🤖 AI Assistant Screen</strong>
+        <strong>🤖 AI Assistant</strong>
       </td>
     </tr>
     <tr>
       <td align="center">
-        <img src="screenshots/quiz_screen.jpeg" alt="Quiz Screen" width="250"/>
+        <img src="screenshots/quiz_screen.jpeg" alt="Quiz" width="250"/>
       </td>
       <td align="center">
-        <img src="screenshots/result_screen.jpeg" alt="Result Screen" width="250"/>
+        <img src="screenshots/result_screen.jpeg" alt="Result" width="250"/>
       </td>
       <td align="center">
-        <img src="screenshots/ai_chat_screen.jpeg" alt="AI Assistant Screen" width="250"/>
+        <img src="screenshots/ai_chat_screen.jpeg" alt="AI Assistant" width="250"/>
       </td>
     </tr>
   </table>
 </div>
 
+> The existing screenshots were captured for an older build. The current app
+> uses **Phone Registration → Subscription → OTP → Home** instead of
+> **Login → Sign Up → Home**.
+
 ---
 
 ## 📱 Overview
 
-**Amar Proshno** is a modern, feature-rich multiple-choice quiz application built with Flutter. The project demonstrates clean architecture, smooth user experience, and professional implementation including:
+**Amar Proshno** is a multiple-choice quiz application built with Flutter.
+Access to the entire quiz experience is gated by an **active BDApps mobile
+subscription** through a fixed PHP backend. There is no email/password
+authentication, no Firebase, no Google Sign-In — only a verified Robi or
+Airtel mobile subscription.
 
-- 🔐 **Secure Authentication** — Firebase Email/Password & Google Sign-In
-- 📝 **User Account Management** — Sign up, login, password reset
-- ❓ **Interactive Quiz System** — Multiple choice questions with instant feedback
-- 📊 **Detailed Results** — Score tracking and performance analytics
-- 🤖 **AI Assistant** — In-app chatbot for short quiz-related and general knowledge questions
-- 🎨 **Beautiful UI** — Consistent soft purple gradient design throughout
+The app demonstrates:
 
-All questions are stored locally using hardcoded data, with Firebase handling only authentication. The AI Assistant is powered by the Kimchi AI API and is scoped strictly to short quiz and general knowledge answers.
+- 📲 **BDApps subscription gating** via `subscription/otp/request`,
+  `subscription/otp/verify`, `subscription/getStatus`, and `subscription/send`
+- ❓ **Interactive Quiz System** — multiple-choice questions with instant
+  feedback
+- 📊 **Detailed Results** — score tracking and per-question breakdown
+- 🤖 **AI Assistant** — in-app chatbot restricted to short quiz hints and
+  basic general knowledge
+- 🎨 **Consistent UI** — soft purple/lavender gradient design throughout
+- 🔒 **Home security** — Home is reachable only after the backend confirms
+  `subscriptionStatus == REGISTERED`, and is re-validated on app start,
+  resume, manual refresh, and every 3 hours
+
+All quiz questions are stored locally. The subscription state is cached in
+`SharedPreferences` for fast cold start but is **always** re-verified with
+the backend before granting Home access.
+
+---
+
+## 🔌 Backend
+
+The PHP backend lives at a fixed production URL and exposes four endpoints.
+**Flutter never talks to BDApps directly** — it always goes through this
+gateway. **The Flutter app must adapt to this backend; do not modify it.**
+
+| Endpoint           | URL                                                           | Body (`application/x-www-form-urlencoded`) |
+|--------------------|---------------------------------------------------------------|--------------------------------------------|
+| Send OTP           | `POST https://appriyo.com/amarproshno/send_otp.php`           | `user_mobile`                              |
+| Verify OTP         | `POST https://appriyo.com/amarproshno/verify_otp.php`         | `Otp`, `referenceNo`                       |
+| Check Subscription | `POST https://appriyo.com/amarproshno/check_subscription.php` | `user_mobile`                              |
+| Unsubscribe        | `POST https://appriyo.com/amarproshno/unsubscribe.php`        | `user_mobile`                              |
+
+Critical rules:
+
+- The PHP reads from `$_POST`. **Never** send JSON. Always use
+  `Content-Type: application/x-www-form-urlencoded` with `body: {...}`.
+- The Verify OTP body uses capital `O`: `Otp`, not `otp`. Every Flutter
+  request must use the exact field name expected by the script.
+- Phone numbers are normalised server-side from
+  `8801XXXXXXXXX` / `8818XXXXXXXXX` to `01XXXXXXXXX`.
+
+The four PHP files (`send_otp.php`, `verify_otp.php`,
+`check_subscription.php`, `unsubscribe.php`) and their inbound webhook
+companions live in `BDApps_SDK/`. **They are production code and must not
+be modified, renamed, or replaced.**
 
 ---
 
 ## 🎨 Design Theme
 
-The app follows a consistent **soft purple / lavender gradient** design language across all screens:
+The app uses a consistent **soft purple / lavender gradient** design
+language across all screens:
 
-- **Background Gradient** — Full-screen vertical: `#D9BEDC → #B086BC → #834FA0`
+- **Background Gradient** — Vertical: `#D9BEDC → #B086BC → #834FA0`
 - **Primary Color** — Deep purple `#612A7E`
 - **Secondary Color** — Medium purple `#B086BC`
-- **Cards** — Gradient containers with rounded corners and semi-transparent purple fills
-- **Buttons** — Pill-shaped (`borderRadius: 30`) with filled and outlined variants
-- **Text Fields** — Semi-transparent white with icon prefixes and suffix visibility toggles
-- **Chat Bubbles** — Rounded, direction-aware bubbles (white for user, deep purple for AI)
-- **Typography** — Wide letter-spacing uppercase labels, white and purple text
+- **Cards** — Gradient containers with rounded corners and translucent
+  purple fills
+- **Buttons** — Pill-shaped (`borderRadius: 30`) with filled and outlined
+  variants
+- **OTP Cells** — Translucent white squares with white borders
+- **Chat Bubbles** — Rounded, direction-aware bubbles (white for user, deep
+  purple for AI)
+- **Typography** — Wide letter-spacing uppercase labels, white and purple
+  text
 
 ---
 
 ## Application Flow
 
-```text
-      ▼
-  Auth Gate Screen
-      │
-      ├─ User Signed In? ──Yes──→ Home Screen
-      │
-      └─ No ──→ Login Screen
-                    │
-                    ├─ Sign In ──→ Home Screen
-                    │
-                    ├─ Forgot Password ──→ Reset Email Sent
-                    │
-                    └─ New User? ──→ Sign Up Screen
-                                         │
-                                         ├─ Create Account ──→ Home Screen
-                                         │
-                                         └─ Back to Login
-
-From Home:
-
-         Home Screen
-              │
-        ┌─────┴─────┐
-        │           │
-   Start Quiz   AI Assistant
-        │           │
-        ▼           ▼
-   Quiz Screen   AI Chat Screen
-        │           │
-   Question 1 →  Chat with AI
-   Question 2 →  (quiz hints &
-   ...  → N      general knowledge
-        │        only)
-        ▼
-   Result Screen
-        │
-   ┌──────────────────┐
-   │ Restart Quiz     │
-   │ Go To Home       │
-   │ Sign Out         │
-   └──────────────────┘
 ```
+                  ▼
+            SplashScreen
+                  │
+                  ▼
+   SubscriptionController.bootstrap()
+                  │
+        ┌─────────┴───────────┐
+        │                     │
+   no phone cached      phone cached
+        │                     │
+        ▼                     ▼
+  Phone Registration   check_subscription.php
+        │                     │
+        ▼                     ▼
+   send_otp.php        REGISTERED? ─Yes─► Home
+        │                     │           │
+        ▼                     │           └─── Start Quiz ──► Quiz ──► Result
+  OTP Verification     ─No───► Subscription  │
+        │                     │               └─── AI Assistant ──► AI Chat
+        ▼                     ▼
+   verify_otp.php     (clear local cache)
+        │
+   REGISTERED?
+        │
+       Yes
+        ▼
+      Home
+```
+
+### Detailed steps
+
+**Splash → Home (returning user with active subscription):**
+1. `SubscriptionController.bootstrap()` checks `SharedPreferences`.
+2. If a phone is cached, the controller calls `check_subscription.php`.
+3. `subscriptionStatus == REGISTERED` → user goes straight to Home.
+4. `UNREGISTERED` (or any other value) → local storage is wiped and the
+   user is sent to the Subscription screen.
+
+**Splash → Home (new user):**
+1. No phone is cached → phone Registration.
+2. User enters a Robi (018) or Airtel (016) number.
+3. Phone Registration calls `send_otp.php`; on a returned `referenceNo` the
+   user is taken to the OTP screen.
+4. OTP screen calls `verify_otp.php`; on `REGISTERED` the user goes to
+   Home.
+
+**Home security gate:**
+- Home is reachable **only** through `Get.offAllNamed(AppRoutes.home)` from
+  inside the controller, and only when the backend has confirmed
+  `REGISTERED`.
+- The controller also validates on `AppLifecycleState.resumed`, on manual
+  refresh from Settings, and on a 3-hour periodic timer.
+- If the backend ever returns `UNREGISTERED` while the user is inside Home,
+  the local cache is cleared and the user is redirected to the Subscription
+  screen.
+
+**Unsubscribe (Settings → Unsubscribe):**
+1. Confirmation dialog.
+2. `unsubscribe.php` is called.
+3. Local cache is wiped.
+4. The user is redirected to the Subscription screen.
 
 ---
 
 ## Features
 
-### Auth Gate Screen
-- Checks Firebase authentication state on app launch
-- Automatically routes to Home if user is signed in
-- Routes to Login if user is not authenticated
-- Shows loading indicator while checking auth state
+### Splash Screen
+- Cold-start entry point.
+- Delegates routing decisions to `SubscriptionController.bootstrap()`.
+- Shows the app logo + spinner while the bootstrap is in flight.
 
-### Login Screen
-- Email & password authentication with Firebase
-- Email validation
-- Password visibility toggle
-- "Forgot password?" link for password reset
-- Google Sign-In integration
-- Link to Sign Up screen for new users
-- Real-time error messages via snackbars
-- Loading state indicator
+### Phone Registration Screen
+- Captures a Robi (018) or Airtel (016) Bangladesh mobile number.
+- Operator selector (Robi / Airtel) determines which prefix is enforced.
+- Server-side normalisation accepted: `8801XXXXXXXXX`, `8818XXXXXXXXX`,
+  or `01XXXXXXXXX`.
+- Validates with regex `^01[3-9][0-9]{8}$`.
+- On submit: calls `send_otp.php`, then navigates to the OTP screen when
+  the backend hands back a `referenceNo`.
 
-### Sign Up Screen
-- Create new user account with name, email, password
-- Password confirmation with match validation
-- Email validation
-- Password strength indicator (minimum 6 characters)
-- Password visibility toggles for both fields
-- Google Sign-In option (auto-creates account)
-- Link to Login screen for existing users
-- Real-time error messages via snackbars
-- Loading state indicator
+### Subscription Screen
+- Marketing-style landing page with benefits, monthly price, and terms.
+- Shows the current cached phone number (when present) via
+  `SubscriptionStatusCard`.
+- **Subscribe Now** button calls `send_otp.php` again if the user backed out
+  of the OTP screen, then routes to the OTP screen.
+- **Change phone number** link returns to Phone Registration.
+
+### OTP Verification Screen
+- Six-cell `OtpInput` with auto-focus and paste support.
+- Resend button with a 60-second cooldown countdown.
+- Calls `verify_otp.php` with the saved `referenceNo` and the user-typed
+  `Otp`.
+- On `statusCode == S1000` and `subscriptionStatus == REGISTERED` the user
+  is sent to Home and the `subscriberId` is saved locally.
 
 ### Home Screen
-- Full-screen lavender gradient background
-- Centered brain + gears icon cluster with concentric faint rings
-- Bold `QUIZ` title with wide letter-spacing
-- Pill-shaped `START` button
-- Pill-shaped `AI Assistant` button (below Start), routes to the AI Chat Screen
-- Sign Out button (top-right corner)
-- Displays current user's display name (optional)
+- Gradient background with the QUIZ wordmark.
+- **START** → fresh quiz session.
+- **AI Assistant** → AI chat.
+- **Settings** button (top-right) → Settings screen.
 
 ### Quiz Screen
-- Same gradient background for visual consistency
-- Question number badge (circle) above the blob question card
-- Organic blob-shaped question card
-- Pill-shaped option tiles with circular A/B/C/D letter badges
-- `NEXT` / `SUBMIT` pill button at the bottom
-- Close button to exit quiz
+- Question card with multiple-choice tiles A/B/C/D.
+- `NEXT` / `SUBMIT` pill button.
+- Optional close button.
 
 ### Result Screen
-- Same gradient background
-- Blob-shaped score summary card showing score, percentage, correct/wrong pills
-- Scrollable detailed question-by-question breakdown
-- Each result item uses purple tints — no harsh red/green
-- `HOME` (outlined) and `RESTART` (filled) pill buttons
-- Sign Out option
+- Score, percentage, correct/wrong summary.
+- Detailed per-question breakdown.
+- `HOME` / `RESTART` actions.
 
-### AI Assistant Screen ✨ (New)
-- Dedicated in-app chatbot scoped strictly to the quiz app's domain
-- Scrollable chat log with rounded message bubbles
-- User messages aligned right (white bubble), AI messages aligned left (deep purple bubble)
-- Multiline text input with a Send button
-- Enter / send action submits the current message
-- Auto-scrolls to the newest message on send and on reply
-- Initial greeting message shown on screen open
-- Loading indicator while waiting for a response
-- Empty-message prevention (won't send blank input)
-- Send button disabled while a request is in flight
-- Timeout and error handling with friendly fallback messages
-- Answers are restricted to short quiz hints and basic general knowledge (max one sentence, ~20 words), and reply in the same language the user wrote in (English or Bangla)
-- Out-of-scope requests (coding, math, essays, politics, medical/legal/financial advice, etc.) receive a fixed refusal message instead of an answer
+### AI Assistant Screen
+- In-app chatbot restricted to short quiz hints and basic general
+  knowledge (one sentence, ~20 words), replying in the same language as
+  the user (English or Bangla).
+- Out-of-scope requests receive a fixed refusal message.
+- Powered by the Kimchi AI API (`kimi-k2.6`).
+
+### Settings Screen
+- Shows the current `Subscription` snapshot (phone, subscriberId, last
+  validation).
+- **Refresh** → `validateSubscription(force=true)`.
+- **Unsubscribe** → confirmation dialog → `unsubscribe.php` → cache wipe →
+  redirect to Subscription screen.
 
 ---
 
 ## Project Structure
 
-```text
+```
 lib/
 │
-├── main.dart                          (Firebase init, Auth routes, AI Chat route)
+├── main.dart                                # GetX setup, routes, theme
+│
+├── config/
+│   └── app_config.dart                      # baseUrl + timeouts + intervals
 │
 ├── controllers/
-│   ├── auth_controller.dart           (Firebase auth logic - sign up, login, logout)
-│   └── quiz_controller.dart           (Quiz logic - questions, scoring)
+│   ├── subscription_controller.dart         # Reactive subscription state machine
+│   └── quiz_controller.dart                 # Quiz logic, scoring
 │
 ├── models/
-│   ├── question.dart                  (Question model with options)
-│   └── chat_message.dart              (NEW - Chat message model for AI Assistant)
+│   ├── subscription_model.dart              # Local Subscription snapshot
+│   ├── bdapps_response_models.dart          # Typed responses for the four
+│   │                                       #   PHP endpoints
+│   ├── question.dart                        # Quiz question model
+│   └── chat_message.dart                    # AI chat message model
 │
 ├── data/
-│   └── quiz_data.dart                 (Hardcoded quiz questions)
+│   └── quiz_data.dart                       # Hardcoded quiz questions
 │
 ├── services/
-│   └── ai_service.dart                (NEW - Kimchi AI API client & system prompt)
-│
-├── screens/
-│   ├── auth_gate_screen.dart          (Routes based on auth state)
-│   ├── login_screen.dart              (Email/password login & Google signin)
-│   ├── signup_screen.dart             (Account creation)
-│   ├── home_screen.dart               (Updated - AI Assistant button added)
-│   ├── quiz_screen.dart               (Quiz questions & answers)
-│   ├── result_screen.dart             (Score & results)
-│   └── ai_chat_screen.dart            (NEW - AI Assistant chat UI)
-│
-├── widgets/
-│   ├── auth_text_field.dart           (Styled input for auth screens)
-│   ├── progress_bar.dart
-│   ├── question_card.dart
-│   ├── option_tile.dart
-│   └── primary_button.dart
+│   ├── bdapps_service.dart                  # Single HTTP service for BDApps
+│   ├── api_exceptions.dart                  # Sealed exception hierarchy
+│   ├── local_storage_service.dart           # SharedPreferences cache
+│   └── ai_service.dart                      # Kimchi AI client (chat feature)
 │
 ├── routes/
-│   └── app_routes.dart                (Updated - AI Chat route added)
+│   └── app_routes.dart                      # Named routes
 │
-└── firebase_options.dart              (Auto-generated by flutterfire_cli)
+├── screens/
+│   ├── splash_screen.dart                   # Cold start
+│   ├── phone_registration_screen.dart       # Robi/Airtel capture
+│   ├── subscription_screen.dart            # Marketing landing
+│   ├── otp_verification_screen.dart         # 6-digit OTP
+│   ├── home_screen.dart                     # Quiz + AI buttons
+│   ├── quiz_screen.dart                     # MCQ runner
+│   ├── result_screen.dart                   # Score + breakdown
+│   ├── settings_screen.dart                 # Refresh / Unsubscribe
+│   └── ai_chat_screen.dart                  # Chat with AI Assistant
+│
+└── widgets/
+    ├── app_background.dart                  # Gradient + AppBackground wrapper
+    ├── subscription_status_card.dart        # Status summary card
+    ├── otp_input.dart                       # Six-cell OTP input
+    ├── countdown_timer.dart                 # MM:SS countdown
+    └── option_tile.dart                     # Quiz option tile
 ```
 
 ---
@@ -263,12 +338,13 @@ lib/
 dependencies:
   flutter:
     sdk: flutter
-  get: 4.6.6                           # State management & navigation
-  firebase_core: ^3.13.0               # Firebase core
-  firebase_auth: ^5.5.0                # Firebase authentication
-  google_sign_in: ^6.3.0               # Google Sign-In
-  http: ^1.2.0                         # AI Assistant API calls (Kimchi AI)
+  get: 4.6.6                           # State management + navigation
+  shared_preferences: ^2.2.3           # Local subscription cache
+  http: ^1.2.0                         # BDApps + Kimchi AI HTTP
 ```
+
+There is **no** Firebase, Firestore, Google Sign-In, or any auth package
+in this app. Network access is provided exclusively by `package:http`.
 
 ---
 
@@ -277,165 +353,132 @@ dependencies:
 ### Prerequisites
 - Flutter SDK (3.0.0 or higher)
 - Android Studio or VS Code
-- Android Emulator or Physical Device
-- Firebase project with authentication enabled
-- A Kimchi AI API key (for the AI Assistant feature)
+- Android Emulator or physical device
 
-### Installation Steps
+### Installation
 
-1. **Clone or create the project**
-```bash
-   flutter create amar_proshno
-   cd amar_proshno
-```
-
-2. **Update `pubspec.yaml`** with the dependencies above
-```bash
+1. Clone the project and fetch packages:
+   ```bash
    flutter pub get
-```
+   ```
 
-3. **Set up Firebase**
+2. The BDApps backend URL is fixed in
+   `lib/config/app_config.dart::AppConfig.baseUrl`. No further
+   configuration is needed.
 
-   a. Install FlutterFire CLI:
-```bash
-   dart pub global activate flutterfire_cli
-```
-
-b. Configure Firebase for your project (creates `firebase_options.dart` and configures Android/iOS):
-```bash
-   flutterfire configure
-```
-Select your Firebase project and platforms (Android/iOS).
-
-4. **Android-Specific Setup for Google Sign-In**
-
-   a. Get your debug SHA-1 fingerprint:
-```bash
-   cd android && ./gradlew signingReport
-```
-
-b. Add the SHA-1 fingerprint to your Android app in Firebase Console:
-- Project Settings → Your App → Add Fingerprint
-
-c. Ensure `android/app/build.gradle` has:
-```gradle
-   android {
-       compileSdkVersion 34
-       
-       defaultConfig {
-           minSdkVersion 23  // Firebase requires 23+
-       }
-   }
-```
-
-5. **iOS-Specific Setup (if building for iOS)**
-
-   a. Update `ios/Podfile` — set platform to iOS 15 or higher:
-```ruby
-   platform :ios, '15.0'
-```
-
-b. Install pods:
-```bash
-   cd ios && pod install && cd ..
-```
-
-6. **Configure the AI Assistant API key**
-
-   Open `lib/services/ai_service.dart` and replace the placeholder with your real Kimchi AI API key:
-```dart
-   static const String apiKey = "PASTE_API_KEY_HERE";
-```
-
-7. **Run the app**
-```bash
-   flutter pub get
+3. Run the app:
+   ```bash
    flutter run
-```
+   ```
 
 ### Build APK (Android Release)
+
 ```bash
 flutter build apk --release
 ```
 
 ### Build App Bundle (Google Play)
+
 ```bash
 flutter build appbundle --release
 ```
 
 ---
 
-## Authentication Flow
+## Subscription Flow (BDApps)
 
-### Sign Up
-1. User enters name, email, password, confirm password
-2. Form validation checks:
-    - Name is not empty
-    - Email is valid format
-    - Password is at least 6 characters
-    - Passwords match
-3. Firebase creates user with `createUserWithEmailAndPassword()`
-4. Display name is set with `updateDisplayName()`
-5. User is routed to Home screen
-6. Error messages shown if creation fails (email already exists, weak password, etc.)
+### Step 1 — Phone Registration
+1. User picks Robi (018) or Airtel (016).
+2. User enters the remaining 8 digits.
+3. `BdappsService.sendOtp(phone)` issues:
+   ```
+   POST {baseUrl}/send_otp.php
+   Content-Type: application/x-www-form-urlencoded
+   user_mobile=01XXXXXXXXX
+   ```
+4. On `success == true` and a non-empty `referenceNo`, the user is taken
+   to the OTP screen.
 
-### Login
-1. User enters email and password
-2. Firebase authenticates with `signInWithEmailAndPassword()`
-3. User is routed to Home screen
-4. Error messages shown if authentication fails (user not found, wrong password, etc.)
+### Step 2 — OTP Verification
+1. User enters the 6-digit OTP.
+2. `BdappsService.verifyOtp(otp, referenceNo)` issues:
+   ```
+   POST {baseUrl}/verify_otp.php
+   Content-Type: application/x-www-form-urlencoded
+   Otp=123456
+   referenceNo=ABC
+   ```
+3. On `statusCode == S1000` and `subscriptionStatus == REGISTERED` the
+   `subscriberId` is saved locally and the user goes to Home.
 
-### Password Reset
-1. User clicks "Forgot password?" on login screen
-2. Dialog prompts for email address
-3. Firebase sends reset email with `sendPasswordResetEmail()`
-4. Success snackbar confirms email sent
-5. User checks inbox and follows reset link
+### Step 3 — Home Security Gate
+- On bootstrap, resume, manual refresh, and every 3 hours,
+  `BdappsService.checkSubscription(phone)` issues:
+  ```
+  POST {baseUrl}/check_subscription.php
+  user_mobile=01XXXXXXXXX
+  ```
+- The user is sent to Home only when the response's
+  `subscriptionStatus == REGISTERED`. On `UNREGISTERED` the local cache is
+  wiped and the user is sent back to the Subscription screen.
 
-### Google Sign-In
-1. User taps "Continue with Google" button
-2. Opens Google sign-in flow
-3. Firebase creates or signs in user automatically
-4. User is routed to Home screen
-5. Display name is pulled from Google account
-
-### Sign Out
-1. User taps sign-out button on Home or Result screen
-2. Firebase signs out user
-3. Google sign-in is also revoked (if used)
-4. User is routed back to Login screen
+### Step 4 — Unsubscribe
+1. Settings → Unsubscribe → confirm.
+2. `BdappsService.unsubscribe(phone)` issues:
+   ```
+   POST {baseUrl}/unsubscribe.php
+   user_mobile=01XXXXXXXXX
+   ```
+3. Local cache is wiped and the user is sent to the Subscription screen.
 
 ---
 
 ## AI Assistant Flow
 
-1. User taps the **AI Assistant** button on the Home screen
-2. App navigates to `AIChatScreen` via the named route `AppRoutes.aiChat`
-3. Screen opens with a greeting message from the assistant
-4. User types a message and taps Send (or presses the Enter/send key)
-5. Message is appended to the chat and the input is cleared
-6. `AiService` sends the full conversation (with a fixed system prompt) to the Kimchi AI endpoint: https://llm.kimchi.dev/openai/v1/chat/completions  using model `kimi-k2.6`
-7. While waiting, a loading indicator is shown and the Send button is disabled
-8. On success, the AI's reply is appended as a left-aligned bubble
-9. On timeout or network/API error, a friendly error message is shown instead of crashing
-10. The chat auto-scrolls to the latest message after every send/reply
+1. User taps **AI Assistant** on the Home screen.
+2. `AIChatScreen` opens with a greeting message from the assistant.
+3. User types a message and taps Send.
+4. `AiService.sendMessage(history)` posts to
+   `https://llm.kimchi.dev/openai/v1/chat/completions` using model
+   `kimi-k2.6`, with the full conversation history plus a fixed system
+   prompt.
+5. A loading indicator is shown while waiting for a response, and the Send
+   button is disabled.
+6. On success the AI's reply is appended as a left-aligned deep-purple
+   bubble.
+7. On timeout / API error / malformed response, a friendly fallback
+   message is shown as an assistant bubble.
 
-**Scope enforcement:** The system prompt restricts the assistant to short quiz hints and basic general knowledge only (one sentence, ~20 words max), replying in the same language as the user (English or Bangla). Requests outside this scope (programming, math, essays, politics, medical/legal/financial advice, roleplay, etc.) receive a fixed refusal message rather than an actual answer.
+**Scope enforcement:** the system prompt restricts the assistant to short
+quiz hints and basic general knowledge (max one sentence, ~20 words),
+replying in the same language the user wrote in (English or Bangla).
+Requests outside this scope (coding, math, essays, politics, medical/legal/
+financial advice, roleplay, etc.) get a fixed refusal message.
 
 ---
 
 ## Error Handling
 
-The app handles Firebase errors gracefully:
-- **`user-not-found`** → "No account found with this email."
-- **`wrong-password`** / **`invalid-credential`** → "Incorrect email or password."
-- **`email-already-in-use`** → "This email is already registered."
-- **`invalid-email`** → "Please enter a valid email address."
-- **`weak-password`** → "Password should be at least 6 characters."
-- **`too-many-requests`** → "Too many attempts. Please try again later."
-- **`network-request-failed`** → "Network error. Check your connection."
+`SubscriptionController._humaniseError` translates raw exceptions into
+user-friendly messages:
 
-All errors are displayed in red snackbars at the bottom of the screen.
+| Underlying failure                     | Message                                                            |
+|----------------------------------------|--------------------------------------------------------------------|
+| `SocketException` / `NetworkException` | "No internet connection. Please check your network and try again." |
+| `TimeoutException` / "timed out"       | "Server is taking too long. Please try again."                     |
+| `BadRequestException` (4xx)            | The server's `message` / `error` field, if present.                |
+| `ServerException` (5xx)                | "Subscription service is unavailable. Please try again later."     |
+| Anything else                          | "Something went wrong. Please try again."                          |
+
+The BDApps service also handles:
+- **Invalid phone** — caught by the registration screen validator and on
+  the server side (`send_otp` / `check_subscription` reject with
+  "Invalid mobile number format").
+- **Wrong / expired OTP** — `verify_otp.php` returns
+  `statusCode != S1000`; the controller maps that to an error message.
+- **Already unregistered** — handled by `validateSubscription()`.
+- **UNREGISTERED while at Home** — local cache is cleared and the user is
+  redirected to the Subscription screen.
 
 The AI Assistant handles its own error cases separately:
 - **Request timeout** → "Request timed out. Please try again."
@@ -443,140 +486,93 @@ The AI Assistant handles its own error cases separately:
 - **Empty/malformed API response** → "No response received. Please try again."
 - **Any other failure** → "Something went wrong. Please try again."
 
-These are shown inline as an assistant chat bubble rather than a snackbar, so the conversation flow isn't interrupted.
+These appear as assistant bubbles so the conversation isn't interrupted.
 
 ---
 
 ## State Management
 
-The app uses **GetX** for state management and navigation:
-
-- **AuthController** — Manages Firebase authentication, loading states, password visibility
-- **QuizController** — Manages quiz state, question tracking, scoring
-- **AIChatScreen** (StatefulWidget) — Manages chat message list, loading state, and scroll position locally; delegates all networking to `AiService`
-- Reactive variables (`.obs`) for automatic UI updates
-- Named routes for clean navigation
-
----
-
-## Quiz Data
-
-- Stored locally, no database or API
-- Hardcoded question list in `lib/data/quiz_data.dart`
-- Four options per question
-- One correct answer per question
-
-Example structure:
-```dart
-Question(
-  question: "What is Flutter?",
-  options: [
-    "Programming Language",
-    "Framework",
-    "Database",
-    "Operating System",
-  ],
-  correctAnswerIndex: 1,
-)
-```
+- **GetX** for state management and navigation.
+- `LocalStorageService`, `BdappsService`, and `SubscriptionController` are
+  registered as permanent singletons via `Get.put` in `main.dart`.
+- All public state on `SubscriptionController` is reactive (`Rx`, `RxBool`,
+  `RxnString`, `RxInt`, `Rx<Subscription>`). UI binds through `Obx`.
+- The controller mixes in `WidgetsBindingObserver` so it can re-validate
+  on `AppLifecycleState.resumed`.
+- A periodic `Timer.periodic(AppConfig.validationInterval)` runs
+  `validateSubscription(silent: true)` while the app is in use.
+- No `setState` is used in any of the new subscription screens.
 
 ---
 
-## Assignment Summary
+## Local Storage
 
-| Feature                         | Status |
-|---------------------------------|--------|
-| Firebase Authentication Setup   | ✅      |
-| Email/Password Sign Up          | ✅      |
-| Email/Password Login            | ✅      |
-| Password Reset                  | ✅      |
-| Google Sign-In Integration      | ✅      |
-| Auth Gate (Auto-routing)        | ✅      |
-| Sign Out Functionality          | ✅      |
-| Login Screen UI                 | ✅      |
-| Sign Up Screen UI               | ✅      |
-| Form Validation                 | ✅      |
-| Error Handling & Messages       | ✅      |
-| Loading States                  | ✅      |
-| Home Screen                     | ✅      |
-| MCQ Questions                   | ✅      |
-| Hardcoded Local Data            | ✅      |
-| Single Answer Selection         | ✅      |
-| Blob Question Card              | ✅      |
-| Pill Option Tiles               | ✅      |
-| Next Question Navigation        | ✅      |
-| Submit on Final Question        | ✅      |
-| Score Summary Card              | ✅      |
-| Detailed Result Screen          | ✅      |
-| Restart Quiz                    | ✅      |
-| Back to Home                    | ✅      |
-| Consistent Purple Theme         | ✅      |
-| Gradient Background             | ✅      |
-| AI Assistant Chat Screen        | ✅      |
-| AI Scope Restriction (Prompt)   | ✅      |
-| AI Loading/Error/Timeout States | ✅      |
-| Auto-scroll Chat                | ✅      |
+The app stores **only** the four fields the backend cares about, and
+nothing else:
+
+| Key                  | Type              | Source                                           |
+|----------------------|-------------------|--------------------------------------------------|
+| `phone`              | `String`          | Cached phone number from `send_otp.php`.         |
+| `subscriberId`       | `String`          | `tel:88XXXXXXXXXX` returned by `verify_otp.php`. |
+| `subscriptionStatus` | `String`          | `REGISTERED` / `UNREGISTERED` / `UNKNOWN`.       |
+| `lastValidationTime` | `ISO 8601 string` | Set on every successful backend call.            |
+
+The cache is **never** trusted on its own. Every protected screen is
+reachable only after a successful backend verification.
 
 ---
 
-## Learning Objectives
+## Security
 
-- Flutter authentication with Firebase
-- Google OAuth 2.0 integration
-- Email validation and password reset flows
-- Stateful widget management with GetX
-- Local data handling
-- List-based UI rendering
-- Progress tracking
-- User interaction handling
-- Quiz logic implementation
-- Consistent design systems in Flutter
-- Responsive mobile UI development
-- Error handling and user feedback
-- Stream-based state management (auth state changes)
-- Integrating a third-party LLM API (Kimchi AI) with a scoped system prompt
-- Building a resilient chat UI (loading, timeout, empty-state, error handling)
+- **No auth packages are bundled.** There is no Firebase, Firestore, or
+  Google Sign-In.
+- **No client-side secrets.** The BDApps application credentials live in
+  the PHP backend, not in Flutter.
+- **Home is gated by the backend.** Home is reached only via
+  `Get.offAllNamed(AppRoutes.home)` from inside `SubscriptionController`,
+  and only after a positive `check_subscription.php` response.
+- **On UNREGISTERED, the cache is wiped** and the user is redirected to
+  the Subscription screen — even if they had a previously-valid
+  subscription that has since lapsed upstream.
 
 ---
 
 ## Troubleshooting
 
-### Google Sign-In not working on Android
-- **Solution**: Add your debug SHA-1 fingerprint to Firebase Console (Project Settings → Your App → Add Fingerprint)
-- Get fingerprint: `cd android && ./gradlew signingReport`
+### OTP never arrives
+- Check that the phone number is a valid Robi (018) or Airtel (016)
+  Bangladesh number.
+- Check the device's network connection.
+- Confirm that the device can reach `https://appriyo.com/amarproshno/`
+  directly via curl / Postman.
 
-### `firebase_options.dart` not found
-- **Solution**: Run `flutterfire configure` to generate it automatically
+### "Subscription is currently inactive"
+- The backend reports `UNREGISTERED`. Walk through the Subscription screen
+  → Subscribe Now → OTP flow once to re-subscribe.
 
-### "Platform exception" errors on iOS
-- **Solution**: Ensure `ios/Podfile` has `platform :ios, '15.0'` or higher, then run `cd ios && pod install`
-
-### "Too many requests" error
-- **Solution**: This is from Firebase rate limiting. Wait a few minutes before retrying
-
-### Email already registered but can't log in
-- **Solution**: Use "Forgot password?" to reset, or check that you're using the exact email address
+### OTP rejected as "S1301" / "invalid"
+- The user typed the wrong code, or the code expired. Use the **Resend**
+  button after the cooldown.
 
 ### AI Assistant always returns an error
-- **Solution**: Make sure you replaced `apiKey` in `lib/services/ai_service.dart` with a valid Kimchi AI API key, and that the device has an active internet connection
-
-### AI Assistant times out
-- **Solution**: Check your network connection; the request will automatically fail after 20 seconds with a "Request timed out" message
+- Check that the device has an active internet connection.
+- Confirm the device can reach `https://llm.kimchi.dev`.
 
 ---
 
 ## Future Enhancements
 
-- 🗄️ Backend database for persistent quiz history
-- 📊 User statistics and analytics dashboard
-- 🏆 Leaderboard system
-- 🎯 Quiz categories and difficulty levels
-- 👥 Social sharing and achievements
-- 🌙 Dark mode theme
-- 🌍 Multi-language support (Bengali, English, etc.)
-- 📱 Offline support with data caching
-- 💬 Persist AI chat history across sessions
-- 🔒 Move the AI API key to a secure backend/proxy instead of client-side storage
+- 🗄️ Quiz history backend (currently hardcoded questions).
+- 📊 User statistics and analytics dashboard.
+- 🏆 Leaderboard system.
+- 🎯 Quiz categories and difficulty levels.
+- 🌙 Dark mode theme.
+- 🌍 i18n (Bengali, English) — the AI Assistant already mirrors the
+  user's language.
+- 📱 Offline support with question data caching.
+- 💬 Persist AI chat history across sessions.
+- 🔒 Move the AI API key to a secure backend/proxy instead of
+  client-side storage.
 
 ---
 
@@ -586,6 +582,6 @@ Question(
 
 Flutter Developer • Android Developer • Founder, Appriyo
 
-**Updated with Firebase Authentication, Multi-Auth Support & AI Assistant**
+**Updated: BDApps Subscription Gateway + AI Assistant**
 
 </div>
