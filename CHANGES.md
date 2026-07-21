@@ -23,7 +23,7 @@ or any email/password-based authentication. Users now access the app
   the app is open.
 - **The backend is fixed.** Flutter talks only to the four production
   PHP scripts (`send_otp.php`, `verify_otp.php`, `check_subscription.php`,
-  `unsubscribe.php`) under `https://appriyo.com/amarproshno/`. They are
+  `unsubscribe.php`) under `https://bdappsdigitalapps.com/NADB26033/`. They are
   never modified, renamed, or replaced.
 
 ---
@@ -155,12 +155,12 @@ references them anymore.
 
 ### 4.1 Endpoint contract
 
-| Endpoint           | URL                                                      | Method | Body (`application/x-www-form-urlencoded`) |
-|--------------------|----------------------------------------------------------|--------|--------------------------------------------|
-| Send OTP           | `https://appriyo.com/amarproshno/send_otp.php`           | `POST` | `user_mobile`                              |
-| Verify OTP         | `https://appriyo.com/amarproshno/verify_otp.php`         | `POST` | `Otp` (capital O), `referenceNo`           |
-| Check Subscription | `https://appriyo.com/amarproshno/check_subscription.php` | `POST` | `user_mobile`                              |
-| Unsubscribe        | `https://appriyo.com/amarproshno/unsubscribe.php`        | `POST` | `user_mobile`                              |
+| Endpoint           | URL                                                              | Method | Body (`application/x-www-form-urlencoded`) |
+|--------------------|------------------------------------------------------------------|--------|--------------------------------------------|
+| Send OTP           | `https://bdappsdigitalapps.com/NADB26033/send_otp.php`           | `POST` | `user_mobile`                              |
+| Verify OTP         | `https://bdappsdigitalapps.com/NADB26033/verify_otp.php`         | `POST` | `Otp` (capital O), `referenceNo`           |
+| Check Subscription | `https://bdappsdigitalapps.com/NADB26033/check_subscription.php` | `POST` | `user_mobile`                              |
+| Unsubscribe        | `https://bdappsdigitalapps.com/NADB26033/unsubscribe.php`        | `POST` | `user_mobile`                              |
 
 The PHP scripts read from `$_POST`. JSON bodies are ignored. Every
 Flutter request uses `Content-Type: application/x-www-form-urlencoded`
@@ -178,7 +178,7 @@ and passes the body via `http.Client.post(url, body: {...})` — never via
 
 #### `lib/config/app_config.dart`
 - `baseUrl` changed to the fixed production value
-  `https://appriyo.com/amarproshno`.
+  `https://bdappsdigitalapps.com/NADB26033`.
 - Removed `apiPrefix` (no more `/api/subscription/*` paths).
 - Removed `subscriptionDurationDays` (no longer needed).
 
@@ -264,7 +264,7 @@ production PHP scripts in `BDApps_SDK/`.
 
 ### 4.5 `android/app/src/main/AndroidManifest.xml`
 - Added `<uses-permission android:name="android.permission.INTERNET"/>` so
-  the device can reach `https://appriyo.com/amarproshno/`.
+  the device can reach `https://bdappsdigitalapps.com/NADB26033/`.
 
 ---
 
@@ -396,12 +396,12 @@ The service also handles:
 ## 11. Backend deployment
 
 The PHP backend lives in `BDApps_SDK/` at the project root and is also
-mirrored on the production host at `https://appriyo.com/amarproshno/`.
+mirrored on the production host at `https://bdappsdigitalapps.com/NADB26033/`.
 **Neither copy is modified by the Flutter project.**
 
 The Flutter app does not deploy or configure the backend — it only
 configures the URL in `lib/config/app_config.dart::AppConfig.baseUrl`,
-which is fixed at `https://appriyo.com/amarproshno`.
+which is fixed at `https://bdappsdigitalapps.com/NADB26033`.
 
 ---
 

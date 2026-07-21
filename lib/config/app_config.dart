@@ -17,7 +17,7 @@ class AppConfig {
   AppConfig._();
 
   /// Fixed base URL of the BDApps PHP backend.
-  static const String baseUrl = 'https://appriyo.com/amarproshno';
+  static const String baseUrl = 'https://bdappsdigitalapps.com/NADB26033';
 
   /// Total HTTP timeout when talking to the BDApps wrapper.
   static const Duration requestTimeout = Duration(seconds: 30);

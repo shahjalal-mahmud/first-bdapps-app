@@ -104,12 +104,12 @@ The PHP backend lives at a fixed production URL and exposes four endpoints.
 **Flutter never talks to BDApps directly** — it always goes through this
 gateway. **The Flutter app must adapt to this backend; do not modify it.**
 
-| Endpoint           | URL                                                           | Body (`application/x-www-form-urlencoded`) |
-|--------------------|---------------------------------------------------------------|--------------------------------------------|
-| Send OTP           | `POST https://appriyo.com/amarproshno/send_otp.php`           | `user_mobile`                              |
-| Verify OTP         | `POST https://appriyo.com/amarproshno/verify_otp.php`         | `Otp`, `referenceNo`                       |
-| Check Subscription | `POST https://appriyo.com/amarproshno/check_subscription.php` | `user_mobile`                              |
-| Unsubscribe        | `POST https://appriyo.com/amarproshno/unsubscribe.php`        | `user_mobile`                              |
+| Endpoint           | URL                                                                   | Body (`application/x-www-form-urlencoded`) |
+|--------------------|-----------------------------------------------------------------------|--------------------------------------------|
+| Send OTP           | `POST https://bdappsdigitalapps.com/NADB26033/send_otp.php`           | `user_mobile`                              |
+| Verify OTP         | `POST https://bdappsdigitalapps.com/NADB26033/verify_otp.php`         | `Otp`, `referenceNo`                       |
+| Check Subscription | `POST https://bdappsdigitalapps.com/NADB26033/check_subscription.php` | `user_mobile`                              |
+| Unsubscribe        | `POST https://bdappsdigitalapps.com/NADB26033/unsubscribe.php`        | `user_mobile`                              |
 
 Critical rules:
 
@@ -543,7 +543,7 @@ reachable only after a successful backend verification.
 - Check that the phone number is a valid Robi (018) or Airtel (016)
   Bangladesh number.
 - Check the device's network connection.
-- Confirm that the device can reach `https://appriyo.com/amarproshno/`
+- Confirm that the device can reach `https://bdappsdigitalapps.com/NADB26033/`
   directly via curl / Postman.
 
 ### "Subscription is currently inactive"
